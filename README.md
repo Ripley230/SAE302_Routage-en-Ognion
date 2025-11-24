@@ -2,3 +2,4 @@
 
 ## Planning
 - Phase 1: Analyse
+- Phase 2: Développement technique
