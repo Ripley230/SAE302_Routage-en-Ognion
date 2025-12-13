@@ -188,3 +188,4 @@ fen.show()
 sys.exit(app.exec_())
 # UI adjustments
 # UI adjustments
+# Debug UI
