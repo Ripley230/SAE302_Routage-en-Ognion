@@ -123,3 +123,4 @@ sys.exit(app.exec_())
 # Fix timeout
 # Integration tests
 # Fix thread management
+# Integration OK
