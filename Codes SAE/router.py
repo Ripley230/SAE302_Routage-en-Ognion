@@ -76,8 +76,9 @@ class RouteurWindow(QMainWindow):
             # On récupère notre vraie IP locale pour l'envoyer à l'annuaire
             # (Sinon on envoie 127.0.0.1 et les autres ne pourront pas nous contacter)
             try:
+                # On essaie de se connecter à l'annuaire pour trouver notre IP locale
                 tmp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                tmp.connect(("8.8.8.8", 80))
+                tmp.connect((IP_ANNUAIRE, 9000))
                 mon_ip = tmp.getsockname()[0]
                 tmp.close()
             except:
