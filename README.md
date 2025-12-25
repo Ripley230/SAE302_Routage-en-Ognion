@@ -22,13 +22,13 @@ Ce projet implémente un système de **routage en oignon** (inspiré du réseau 
 ---
 
 ## Fonctionnalités
-- ✅ **Annuaire (Master)** : Serveur central gérant l'enregistrement des routeurs et la distribution de la liste aux clients.
-- ✅ **Routeurs Oignon** : Nœuds de relais effectuant le déchiffrement d'une couche et la transmission au saut suivant.
-- ✅ **Client Multi-Rôles** : Interface permettant d'envoyer des messages chiffrés et d'en recevoir.
-- ✅ **Chiffrement Hybride** : Utilisation de **RSA** pour l'échange de clefs et **XOR** pour le payload (implémentation maison sans librairie crypto).
-- ✅ **Routage Dynamique** : Choix du nombre de sauts (1 à 10) par le client.
-- ✅ **Interface Graphique** : Interfaces modernes développées avec **PyQt5**.
-- ✅ **Persistance** : Utilisation de **MariaDB** pour stocker l'état du réseau.
+- **Annuaire (Master)** : Serveur central gérant l'enregistrement des routeurs et la distribution de la liste aux clients.
+- **Routeurs Oignon** : Nœuds de relais effectuant le déchiffrement d'une couche et la transmission au saut suivant.
+- **Client Multi-Rôles** : Interface permettant d'envoyer des messages chiffrés et d'en recevoir.
+- **Chiffrement Hybride** : Utilisation de **RSA** pour l'échange de clefs et **XOR** pour le payload (implémentation maison sans librairie crypto).
+- **Routage Dynamique** : Choix du nombre de sauts (1 à 10) par le client.
+- **Interface Graphique** : Interfaces modernes développées avec **PyQt5**.
+- **Persistance** : Utilisation de **MariaDB** pour stocker l'état du réseau.
 
 ---
 
@@ -56,20 +56,13 @@ graph LR
 
 ### 1. Dépendances
 ```bash
-# Installation automatique (recommandé)
-sudo python3 install_dependencies.py
-
-# Ou manuelle
 pip3 install PyQt5 mysql-connector-python sympy
 sudo apt install mariadb-server
 ```
 
 ### 2. Base de Données
 ```bash
-# Création de l'utilisateur
 sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onion'; GRANT ALL PRIVILEGES ON *.* TO 'onion'@'localhost'; FLUSH PRIVILEGES;"
-
-# Initialisation
 python3 db_utils.py
 ```
 
@@ -81,9 +74,6 @@ python3 db_utils.py
 2. **Démarrer les Routeurs** : Lancez 3 instances de `onion_router.py` -> Cliquez sur "Démarrer".
 3. **Lancer les Clients** : `python3 client.py` (ouvrez-en deux pour tester la communication).
 
-> [!IMPORTANT]
-> Consultez le [GUIDE_INSTALLATION.md](GUIDE_INSTALLATION.md) pour les détails sur la configuration réseau entre plusieurs VMs.
-
 ---
 
 ## Structure du Projet
@@ -92,7 +82,6 @@ python3 db_utils.py
 - `directory_node.py` : Serveur d'annuaire avec interface graphique.
 - `onion_router.py` : Nœud de routage intermédiaire.
 - `client.py` : Application utilisateur (Envoi/Réception).
-- `install_dependencies.py` : Script d'automatisation de l'installation.
 
 ---
 
