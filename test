@@ -1,0 +1,59 @@
+# Rapport de Projet - SAE 3.02
+## Conception d'une architecture distribuée avec routage en oignon
+
+**Groupe : [NOM DU GROUPE]**
+**Membres : Quentin [NOM], [NOM 2], [NOM 3]**
+
+---
+
+### 1. Introduction
+Ce projet a été réalisé dans le cadre de la SAE 3.02. L'objectif était de créer un système de communication anonyme basé sur le routage en oignon (comme Tor). Le principe est simple sur le papier : un message est enveloppé dans plusieurs couches de chiffrement et passe par plusieurs routeurs. Chaque routeur retire une couche et passe le reste au suivant, sans savoir qui est l'émetteur initial ou le destinataire final.
+
+### 2. Organisation du travail
+On a essayé de travailler de manière organisée pour ne pas se marcher sur les pieds :
+- **Quentin** : Architecture réseau, gestion des sockets et serveur annuaire.
+- **[NOM 2]** : Interfaces graphiques (PyQt5) et gestion des logs en temps réel.
+- **[NOM 3]** : Algorithmes de chiffrement RSA, XOR et intégration MariaDB.
+
+On a utilisé VirtualBox avec plusieurs VMs Kali Linux pour tester le côté "distribué" du projet.
+
+### 3. Réalisation Technique
+
+#### 3.1 L'Annuaire (Master)
+Le script `directory_node.py` sert de point d'entrée. Il écoute sur le port 9000. Quand un routeur s'allume, il envoie son IP, son port et sa clé publique à l'annuaire. L'annuaire stocke tout ça dans une base MariaDB.
+On a créé une table `routeurs` avec les colonnes : `ip`, `port`, `e` (exposant RSA) et `n` (module RSA).
+
+#### 3.2 Le Chiffrement RSA et Hybride
+C'était la partie la plus complexe car on n'avait pas le droit aux bibliothèques comme `cryptography`. On a utilisé `sympy` pour générer des nombres premiers et calculer l'inverse modulaire pour la clé privée.
+- **Le problème** : Le RSA pur sur tout le message rendait les paquets énormes (plusieurs Mo pour quelques caractères).
+- **La solution** : On a implémenté un chiffrement **hybride**. On génère une clé de session aléatoire, on chiffre le message avec un XOR (très rapide et léger), et on ne chiffre que la clé de session avec RSA.
+
+#### 3.3 Le Protocole de Communication
+Comme on ne pouvait pas utiliser JSON, on a créé notre propre format de texte avec des séparateurs `|` et `;`.
+- Inscription : `INSCRIPTION|IP|PORT|E|N`
+- Liste des routeurs : `IP1;PORT1;E1;N1|IP2;PORT2;E2;N2|...`
+- Paquet oignon : `IP_SUIVANTE|PORT_SUIVANT|MESSAGE_CHIFFRE`
+
+#### 3.4 Le Client
+Le client récupère la liste des routeurs, en choisit aléatoirement selon le nombre de "sauts" demandé, et construit l'oignon en chiffrant les couches de la plus profonde à la plus externe.
+
+### 4. Difficultés et Solutions
+1. **Réseau NAT** : Au début, les VMs ne se voyaient pas. On a dû créer un "Réseau NAT" dans VirtualBox et fixer l'IP de l'annuaire à `10.0.2.10`.
+2. **Threads et GUI** : PyQt5 n'aime pas qu'on modifie l'interface depuis un thread de réception réseau. On a utilisé des `pyqtSignal` pour envoyer les messages des threads vers la fenêtre principale sans faire crasher l'appli.
+3. **Base de données** : On a eu des erreurs de droits "Access denied". On a dû créer un utilisateur `onion` spécifique dans MariaDB avec tous les privilèges sur la base.
+
+### 5. Compétences acquises (AC)
+Ce projet nous a permis de valider plusieurs compétences :
+- **AC23.01** : On a fait des scripts pour automatiser l'installation (`install_dependencies.py`).
+- **AC23.02** : On a respecté tout le cahier des charges (pas de JSON, pas de crypto externe).
+- **AC23.03** : On a utilisé les sockets TCP pour toutes les communications.
+- **AC23.04 / AC23.05** : On a administré et intégré une base MariaDB dans notre code Python.
+
+### 6. Conclusion
+Le projet fonctionne bien. On arrive à envoyer des messages à travers 3 ou 4 routeurs sans problème. C'était super intéressant de voir comment un protocole comme Tor fonctionne "sous le capot". Si on avait eu plus de temps, on aurait ajouté un système pour détecter si un routeur se déconnecte brusquement.
+
+---
+**Annexes :**
+- `GUIDE_INSTALLATION.md` : Pour refaire l'install.
+- `DOCUMENTATION_TECHNIQUE.md` : Pour les détails des fonctions.
+- `SCENARIO_VIDEO.md` : Le plan de notre démo.
