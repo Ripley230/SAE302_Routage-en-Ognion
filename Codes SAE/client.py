@@ -106,7 +106,9 @@ class ClientWindow(QMainWindow):
             reponse = s.recv(4096).decode('utf-8')
             s.close()
             
-            if not reponse: return False
+            if not reponse: 
+                self.log("Erreur : Aucun routeur n'est inscrit dans l'annuaire.")
+                return False
             
             liste = reponse.split("|")
             self.routeurs = []
