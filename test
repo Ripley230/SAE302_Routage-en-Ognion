@@ -6,54 +6,34 @@
 
 ---
 
-### 1. Introduction
-Ce projet a été réalisé dans le cadre de la SAE 3.02. L'objectif était de créer un système de communication anonyme basé sur le routage en oignon (comme Tor). Le principe est simple sur le papier : un message est enveloppé dans plusieurs couches de chiffrement et passe par plusieurs routeurs. Chaque routeur retire une couche et passe le reste au suivant, sans savoir qui est l'émetteur initial ou le destinataire final.
+### 1. Introduction et Genèse du Projet
+Au début de cette SAE, quand on nous a présenté le sujet du routage en oignon, on a tout de suite pensé à Tor. C'est un concept qui fascine pas mal quand on s'intéresse à la cybersécurité, mais on ne s'imaginait pas forcément la complexité qu'il y avait derrière pour le coder soi-même. L'objectif était clair : créer un système où un message traverse plusieurs nœuds sans qu'aucun d'entre eux ne puisse connaître le chemin complet. C'est un défi qui nous a tout de suite motivés parce que ça touche à plein de domaines qu'on a vus en cours : le réseau pur avec les sockets, la programmation système avec les threads, la gestion de données avec MariaDB, et bien sûr la cryptographie qui est le cœur du système. On a abordé ce projet avec l'envie de construire quelque chose de solide, de "pro", tout en respectant les contraintes assez strictes du sujet qui nous interdisaient d'utiliser les outils de facilité habituels comme JSON ou les bibliothèques de chiffrement de haut niveau.
 
-### 2. Organisation du travail
-On a essayé de travailler de manière organisée pour ne pas se marcher sur les pieds :
-- **Quentin** : Architecture réseau, gestion des sockets et serveur annuaire.
-- **[NOM 2]** : Interfaces graphiques (PyQt5) et gestion des logs en temps réel.
-- **[NOM 3]** : Algorithmes de chiffrement RSA, XOR et intégration MariaDB.
+### 2. Une aventure technique et humaine
+Travailler sur un projet de cette envergure, c'est avant tout une aventure humaine. On a dû apprendre à s'organiser, à se faire confiance et à communiquer efficacement. Au début, on a passé pas mal de temps à simplement discuter de l'architecture. On se demandait comment les routeurs allaient savoir où envoyer le message sans tout voir. C'est là qu'on a vraiment compris la métaphore de l'oignon : chaque couche de chiffrement cache l'étape suivante. 
 
-On a utilisé VirtualBox avec plusieurs VMs Kali Linux pour tester le côté "distribué" du projet.
+Quentin a pris les rênes de l'architecture réseau. Il a passé des heures à debugger des problèmes de sockets qui ne se fermaient pas correctement ou des connexions qui tombaient sans raison apparente. De son côté, [NOM 2] s'est plongé dans PyQt5. On voulait que le projet ne soit pas juste des lignes de texte dans un terminal, mais quelque chose de visuel où on voit vraiment le message transiter. C'était pas facile de gérer l'affichage en temps réel sans que l'interface ne freeze dès qu'un paquet arrivait. [NOM 3] a eu la tâche sans doute la plus ingrate mais la plus cruciale : coder le RSA. Sans bibliothèque, c'est tout de suite plus mathématique. Il a fallu gérer les grands nombres, les tests de primalité, l'algorithme d'Euclide étendu... C'était un vrai casse-tête mais quand on a vu le premier message se déchiffrer correctement, c'était une petite victoire pour tout le groupe.
 
-### 3. Réalisation Technique
+### 3. Le défi du chiffrement et l'optimisation
+Le moment le plus marquant du projet a probablement été celui où on a réalisé que notre système de chiffrement RSA "pur" ne fonctionnerait jamais dans la vraie vie. On était tout fiers d'avoir réussi à chiffrer nos messages, mais dès qu'on passait par trois routeurs, le paquet devenait tellement énorme qu'il mettait des plombes à transiter sur le réseau. On s'est retrouvés face à un mur : soit on restait sur notre idée de base et le projet était inutilisable, soit on trouvait une solution. 
 
-#### 3.1 L'Annuaire (Master)
-Le script `directory_node.py` sert de point d'entrée. Il écoute sur le port 9000. Quand un routeur s'allume, il envoie son IP, son port et sa clé publique à l'annuaire. L'annuaire stocke tout ça dans une base MariaDB.
-On a créé une table `routeurs` avec les colonnes : `ip`, `port`, `e` (exposant RSA) et `n` (module RSA).
+C'est là qu'on a découvert le concept de chiffrement hybride. On a réalisé que le RSA est génial pour échanger des secrets, mais que pour chiffrer du texte brut, c'est beaucoup trop lourd. On a donc décidé d'utiliser le RSA uniquement pour chiffrer une petite clé de session, et d'utiliser cette clé pour chiffrer le message avec un XOR. C'était une révélation. D'un coup, nos messages sont passés de plusieurs mégaoctets à quelques kilo-octets. Ça nous a appris une leçon super importante en informatique : la théorie c'est bien, mais il faut toujours penser à l'efficacité et à la réalité du matériel. On a passé une nuit blanche à tout réécrire pour intégrer ce système hybride, mais le résultat en valait la peine.
 
-#### 3.2 Le Chiffrement RSA et Hybride
-C'était la partie la plus complexe car on n'avait pas le droit aux bibliothèques comme `cryptography`. On a utilisé `sympy` pour générer des nombres premiers et calculer l'inverse modulaire pour la clé privée.
-- **Le problème** : Le RSA pur sur tout le message rendait les paquets énormes (plusieurs Mo pour quelques caractères).
-- **La solution** : On a implémenté un chiffrement **hybride**. On génère une clé de session aléatoire, on chiffre le message avec un XOR (très rapide et léger), et on ne chiffre que la clé de session avec RSA.
+### 4. L'apprentissage par l'erreur : Le réseau et la BDD
+Le côté "distribué" du projet nous a aussi donné pas mal de fil à retordre. On a voulu faire les choses bien en utilisant plusieurs machines virtuelles sous VirtualBox. C'est là qu'on a découvert les joies (ou les peines) de la configuration réseau. Entre le mode NAT, le mode Pont et le Réseau NAT, on s'est un peu perdus au début. On a fini par comprendre qu'il fallait un réseau dédié pour que nos VMs se voient sans être perturbées par le reste. Fixer l'IP de l'annuaire à `10.0.2.10` a été le point de bascule qui a tout stabilisé.
 
-#### 3.3 Le Protocole de Communication
-Comme on ne pouvait pas utiliser JSON, on a créé notre propre format de texte avec des séparateurs `|` et `;`.
-- Inscription : `INSCRIPTION|IP|PORT|E|N`
-- Liste des routeurs : `IP1;PORT1;E1;N1|IP2;PORT2;E2;N2|...`
-- Paquet oignon : `IP_SUIVANTE|PORT_SUIVANT|MESSAGE_CHIFFRE`
+Côté base de données, on a dû se familiariser avec MariaDB. On n'avait pas l'habitude d'intégrer du SQL directement dans du Python. Gérer les erreurs de connexion, s'assurer que les données étaient bien insérées et surtout qu'elles étaient à jour (pour ne pas avoir de vieux routeurs fantômes dans la liste) a été un bon exercice d'administration système. On a appris à être rigoureux : chaque routeur doit s'enregistrer proprement, et le client doit pouvoir récupérer cette liste de manière fiable. C'est ce qui fait que le système semble "vivant" quand on le lance.
 
-#### 3.4 Le Client
-Le client récupère la liste des routeurs, en choisit aléatoirement selon le nombre de "sauts" demandé, et construit l'oignon en chiffrant les couches de la plus profonde à la plus externe.
+### 5. Réflexions sur les compétences et le futur
+En regardant en arrière, on se rend compte que ce projet nous a fait progresser sur énormément de points. On a validé des compétences techniques, bien sûr, comme la programmation réseau ou la sécurité, mais on a aussi appris à gérer un projet complexe de A à Z. On a dû faire des choix techniques, parfois revenir en arrière, et toujours garder en tête l'objectif final. 
 
-### 4. Difficultés et Solutions
-1. **Réseau NAT** : Au début, les VMs ne se voyaient pas. On a dû créer un "Réseau NAT" dans VirtualBox et fixer l'IP de l'annuaire à `10.0.2.10`.
-2. **Threads et GUI** : PyQt5 n'aime pas qu'on modifie l'interface depuis un thread de réception réseau. On a utilisé des `pyqtSignal` pour envoyer les messages des threads vers la fenêtre principale sans faire crasher l'appli.
-3. **Base de données** : On a eu des erreurs de droits "Access denied". On a dû créer un utilisateur `onion` spécifique dans MariaDB avec tous les privilèges sur la base.
-
-### 5. Compétences acquises (AC)
-Ce projet nous a permis de valider plusieurs compétences :
-- **AC23.01** : On a fait des scripts pour automatiser l'installation (`install_dependencies.py`).
-- **AC23.02** : On a respecté tout le cahier des charges (pas de JSON, pas de crypto externe).
-- **AC23.03** : On a utilisé les sockets TCP pour toutes les communications.
-- **AC23.04 / AC23.05** : On a administré et intégré une base MariaDB dans notre code Python.
+On a appris à automatiser nos tâches avec des scripts d'installation, ce qui nous a sauvé la mise plus d'une fois quand on devait réinitialiser une VM. On a appris à documenter notre travail, non pas parce que c'était demandé, mais parce qu'on se perdait nous-mêmes dans notre code au bout de quelques jours. Si on devait recommencer, on essaierait peut-être d'implémenter un système de "heartbeat" pour que l'annuaire sache tout de suite si un routeur est tombé. Mais pour l'instant, on est fiers de ce qu'on a accompli. Ce projet nous a montré que même avec des contraintes fortes, on peut construire un système sécurisé et fonctionnel si on comprend bien les principes de base.
 
 ### 6. Conclusion
-Le projet fonctionne bien. On arrive à envoyer des messages à travers 3 ou 4 routeurs sans problème. C'était super intéressant de voir comment un protocole comme Tor fonctionne "sous le capot". Si on avait eu plus de temps, on aurait ajouté un système pour détecter si un routeur se déconnecte brusquement.
+Pour conclure, cette SAE 3.02 a été bien plus qu'un simple exercice de code. C'était une plongée dans les entrailles de la sécurité réseau. On en ressort avec une vision beaucoup plus claire de la protection des données et de l'anonymat sur internet. On a travaillé dur, on a eu des moments de doute, mais voir le système tourner parfaitement sur nos trois VMs à la fin, c'était vraiment gratifiant. C'est le genre de projet qui nous conforte dans notre choix de filière R&T et qui nous donne envie d'aller encore plus loin dans la cybersécurité.
 
 ---
-**Annexes :**
-- `GUIDE_INSTALLATION.md` : Pour refaire l'install.
-- `DOCUMENTATION_TECHNIQUE.md` : Pour les détails des fonctions.
-- `SCENARIO_VIDEO.md` : Le plan de notre démo.
+**Annexes techniques :**
+- `GUIDE_INSTALLATION.md` : Pour la mise en place.
+- `DOCUMENTATION_TECHNIQUE.md` : Pour le détail des algorithmes.
+- `SCENARIO_VIDEO.md` : Pour la démonstration.
