@@ -52,18 +52,19 @@ graph LR
 
 ---
 
-## Installation Rapide
+## Commandes utiles
 
-### 1. Dépendances
 ```bash
-pip3 install PyQt5 mysql-connector-python sympy
-sudo apt install mariadb-server
+sudo ip addr add 10.0.2.10/24 dev eth0
 ```
-
-### 2. Base de Données
 ```bash
-sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onion'; GRANT ALL PRIVILEGES ON *.* TO 'onion'@'localhost'; FLUSH PRIVILEGES;"
-python3 db_utils.py
+sudu ip addr del 10.0.2.15/24 dev eth0
+```
+```bash
+sudo service mariadb start
+```
+```bash
+sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onion'; ALTER USER 'onion'@'localhost' IDENTIFIED BY 'onion'; GRANT ALL PRIVILEGES ON *.* TO 'onion'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 ```
 
 ---
