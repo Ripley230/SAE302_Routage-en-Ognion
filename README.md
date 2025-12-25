@@ -58,7 +58,7 @@ graph LR
 sudo ip addr add 10.0.2.10/24 dev eth0
 ```
 ```bash
-sudu ip addr del 10.0.2.15/24 dev eth0
+sudo ip addr del 10.0.2.15/24 dev eth0
 ```
 ```bash
 sudo service mariadb start
