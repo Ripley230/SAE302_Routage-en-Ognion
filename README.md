@@ -4,7 +4,7 @@
 
 ---
 
-## 📖 Sommaire
+## Sommaire
 1. [Présentation](#-présentation)
 2. [Fonctionnalités](#-fonctionnalités)
 3. [Architecture du Système](#-architecture-du-système)
@@ -16,12 +16,12 @@
 
 ---
 
-## 🎯 Présentation
+## Présentation
 Ce projet implémente un système de **routage en oignon** (inspiré du réseau Tor) permettant d'anonymiser les communications réseau. L'idée est de faire transiter un message à travers plusieurs nœuds intermédiaires (routeurs), où chaque nœud ne connaît que son prédécesseur et son successeur immédiat.
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 - ✅ **Annuaire (Master)** : Serveur central gérant l'enregistrement des routeurs et la distribution de la liste aux clients.
 - ✅ **Routeurs Oignon** : Nœuds de relais effectuant le déchiffrement d'une couche et la transmission au saut suivant.
 - ✅ **Client Multi-Rôles** : Interface permettant d'envoyer des messages chiffrés et d'en recevoir.
@@ -32,7 +32,7 @@ Ce projet implémente un système de **routage en oignon** (inspiré du réseau 
 
 ---
 
-## 🏗️ Architecture du Système
+## Architecture du Système
 ```mermaid
 graph LR
     A[Client A] -- "Chiffrement en couches" --> R1[Routeur 1]
@@ -52,7 +52,7 @@ graph LR
 
 ---
 
-## ⚡ Installation Rapide
+## Installation Rapide
 
 ### 1. Dépendances
 ```bash
@@ -75,7 +75,7 @@ python3 db_utils.py
 
 ---
 
-## 🚀 Guide d'Utilisation
+## Guide d'Utilisation
 
 1. **Démarrer l'Annuaire** : `python3 directory_node.py` -> Cliquez sur "Lancer le serveur".
 2. **Démarrer les Routeurs** : Lancez 3 instances de `onion_router.py` -> Cliquez sur "Démarrer".
@@ -86,33 +86,28 @@ python3 db_utils.py
 
 ---
 
-## 📂 Structure du Projet
-- 🛠️ `crypto_utils.py` : Cœur cryptographique (RSA, XOR, Nombres premiers).
-- 🗄️ `db_utils.py` : Interface avec la base de données MariaDB.
-- 📋 `directory_node.py` : Serveur d'annuaire avec interface graphique.
-- 🔄 `onion_router.py` : Nœud de routage intermédiaire.
-- 👤 `client.py` : Application utilisateur (Envoi/Réception).
-- 📜 `install_dependencies.py` : Script d'automatisation de l'installation.
+## Structure du Projet
+- `crypto_utils.py` : Cœur cryptographique (RSA, XOR, Nombres premiers).
+- `db_utils.py` : Interface avec la base de données MariaDB.
+- `directory_node.py` : Serveur d'annuaire avec interface graphique.
+- `onion_router.py` : Nœud de routage intermédiaire.
+- `client.py` : Application utilisateur (Envoi/Réception).
+- `install_dependencies.py` : Script d'automatisation de l'installation.
 
 ---
 
-## ⚖️ Contraintes du Sujet
+## Contraintes du Sujet
 - **Bibliothèques Interdites** : `json`, `cryptography` (Respecté : protocole texte et RSA maison).
 - **Bibliothèques Imposées** : `Socket`, `Thread`, `PyQt5`, `MariaDB` (Utilisées).
 - **Algorithme** : Chiffrement asymétrique RSA implémenté de zéro.
 
 ---
 
-## 👥 Auteurs
-**Groupe : [NOM DU GROUPE]**
-- **Quentin [NOM]**
-- [NOM MEMBRE 2]
-- [NOM MEMBRE 3]
+## Auteurs
+Groupe : Les pinguoins
+- Quentin HARTMANN
+- Akaza KOUAME
 
-*Projet réalisé dans le cadre de la SAE 3.02 - Réseaux & Télécoms (2025).*
-
----
-## 📄 Licence
-Projet à but éducatif - SAE 3.02.
+Projet réalisé dans le cadre de la SAE 3.02 - Réseaux & Télécoms (2025).
 
 
