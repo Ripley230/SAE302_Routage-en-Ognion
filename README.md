@@ -1,6 +1,6 @@
-# 🧅 Projet SAE 3.02 : Routage en Oignon (Onion Routing)
+🧅 Projet SAE 3.02 : Routage en Oignon (Onion Routing)
 
-> **Conception d’une architecture distribuée avec routage en oignon pour l'anonymisation des flux.**
+> Conception d’une architecture distribuée avec routage en oignon pour l'anonymisation des flux.
 
 ---
 
