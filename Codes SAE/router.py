@@ -8,15 +8,10 @@ from PyQt5.QtCore import pyqtSignal
 import crypto
 import socket
 
-# --- CONFIGURATION ---
-# CONFIGURATION : IP de la VM Annuaire (Master)
-# Mettre l'IP du PC qui fait tourner l'annuaire (directory_node.py)
-# Si tout est sur le même PC, laisser 127.0.0.1
+# Si sur le même PC, laisser 127.0.0.1
 IP_ANNUAIRE = '10.0.2.10' 
-# ---------------------
 
 class RouteurWindow(QMainWindow):
-    # On crée un "signal" pour parler à l'interface depuis les threads
     signal_log = pyqtSignal(str)
 
     def __init__(self):
@@ -29,7 +24,6 @@ class RouteurWindow(QMainWindow):
         self.widget.setLayout(self.layout)
         self.setCentralWidget(self.widget)
         
-        # Port aléatoire
         self.mon_port = random.randint(8000, 8999)
         
         self.label = QLabel(f"Port : {self.mon_port}")
@@ -44,39 +38,30 @@ class RouteurWindow(QMainWindow):
         
         self.mes_clefs = None
 
-        # On connecte le signal à la fonction qui écrit
         self.signal_log.connect(self.ecrire_log)
 
     def log(self, msg):
-        # Au lieu d'écrire direct, on émet le signal
         self.signal_log.emit(msg)
 
     def ecrire_log(self, msg):
-        # Cette fonction sera exécutée par l'interface graphique
         self.logs.append(msg)
 
     def demarrer(self):
         self.btn.setEnabled(False)
         self.log("Génération des clefs...")
         
-        # On fait ça dans un thread pour pas bloquer
         threading.Thread(target=self.init_routeur).start()
 
     def init_routeur(self):
-        # 1. Générer clefs
         self.mes_clefs = crypto.generer_clefs()
         pub = self.mes_clefs[0]
         self.log("Clefs OK.")
         
-        # 2. S'inscrire à l'annuaire
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((IP_ANNUAIRE, 9000))
-            
-            # On récupère notre vraie IP locale pour l'envoyer à l'annuaire
-            # (Sinon on envoie 127.0.0.1 et les autres ne pourront pas nous contacter)
+
             try:
-                # On essaie de se connecter à l'annuaire pour trouver notre IP locale
                 tmp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 tmp.connect((IP_ANNUAIRE, 9000))
                 mon_ip = tmp.getsockname()[0]
@@ -84,7 +69,6 @@ class RouteurWindow(QMainWindow):
             except:
                 mon_ip = '127.0.0.1'
 
-            # Message : "INSCRIPTION|IP|PORT|E|N"
             msg = f"INSCRIPTION|{mon_ip}|{self.mon_port}|{pub[0]}|{pub[1]}"
             s.send(msg.encode('utf-8'))
             s.close()
@@ -93,7 +77,6 @@ class RouteurWindow(QMainWindow):
             self.log("Erreur connexion annuaire.")
             return
 
-        # 3. Ecouter sur toutes les interfaces
         serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serveur.bind(('0.0.0.0', self.mon_port))
         serveur.listen(5)
@@ -105,19 +88,14 @@ class RouteurWindow(QMainWindow):
 
     def traiter_message(self, client):
         try:
-            # On reçoit le paquet chiffré (suite de nombres "123,456...")
             donnees = client.recv(10240).decode('utf-8')
             self.log("Message reçu !")
             
-            # On déchiffre
             message_clair = crypto.dechiffrer(donnees, self.mes_clefs[1])
             
             if message_clair == "Erreur":
                 self.log("Echec déchiffrement.")
                 return
-            
-            # Le message clair contient : "IP_SUIVANTE|PORT_SUIVANT|MESSAGE_POUR_LUI"
-            # Ou si c'est la fin : "FIN|0|LE_VRAI_MESSAGE"
             
             parties = message_clair.split("|", 2)
             prochain_ip = parties[0]
@@ -128,7 +106,6 @@ class RouteurWindow(QMainWindow):
                 self.log(f">>> MESSAGE FINAL : {reste_du_message}")
             else:
                 self.log(f"Je passe à {prochain_port}")
-                # On envoie au suivant
                 s_suivant = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s_suivant.connect((prochain_ip, prochain_port))
                 s_suivant.send(reste_du_message.encode('utf-8'))
