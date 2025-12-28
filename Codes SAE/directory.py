@@ -6,7 +6,6 @@ from PyQt5.QtCore import pyqtSignal
 
 import db
 
-# Le serveur Annuaire
 class AnnuaireWindow(QMainWindow):
     signal_log = pyqtSignal(str)
 
@@ -15,7 +14,6 @@ class AnnuaireWindow(QMainWindow):
         self.setWindowTitle("Annuaire (Master)")
         self.resize(400, 300)
         
-        # Interface simple
         self.layout = QVBoxLayout()
         self.widget = QWidget()
         self.widget.setLayout(self.layout)
@@ -31,7 +29,6 @@ class AnnuaireWindow(QMainWindow):
         self.logs = QTextEdit()
         self.layout.addWidget(self.logs)
         
-        # Init BDD
         db.init_bdd()
         
         self.signal_log.connect(self.ecrire_log)
@@ -39,7 +36,6 @@ class AnnuaireWindow(QMainWindow):
     def lancer_serveur(self):
         self.btn.setEnabled(False)
         self.log("Démarrage...")
-        # On lance le thread d'écoute
         t = threading.Thread(target=self.ecouter)
         t.daemon = True
         t.start()
@@ -54,8 +50,7 @@ class AnnuaireWindow(QMainWindow):
         serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serveur.bind(('0.0.0.0', 9000))
         serveur.listen(5)
-        
-        # Récupération de l'IP locale pour affichage
+
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))
@@ -68,17 +63,13 @@ class AnnuaireWindow(QMainWindow):
         
         while True:
             client, adresse = serveur.accept()
-            # On gère le client
+
             threading.Thread(target=self.gerer_client, args=(client,)).start()
 
     def gerer_client(self, client):
         try:
-            # On reçoit le message
             message = client.recv(1024).decode('utf-8')
             self.log(f"Reçu : {message}")
-            
-            # Protocole simple : on coupe avec "|"
-            # Exemple : "INSCRIPTION|127.0.0.1|8000|65537|12345"
             parties = message.split("|")
             commande = parties[0]
             
@@ -92,12 +83,9 @@ class AnnuaireWindow(QMainWindow):
                 self.log(f"Routeur inscrit : {port}")
                 
             elif commande == "LISTE":
-                # On renvoie la liste sous forme de texte
-                # Format : "IP1;PORT1;E1;N1|IP2;PORT2;E2;N2"
                 routeurs = db.lire_routeurs()
                 liste_txt = []
                 for r in routeurs:
-                    # r est un tuple (ip, port, e, n)
                     info = f"{r[0]};{r[1]};{r[2]};{r[3]}"
                     liste_txt.append(info)
                 
