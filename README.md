@@ -85,14 +85,14 @@ sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onio
 - `db.py` : Interface avec la base de données MariaDB.
 - `directory_node.py` : Serveur d'annuaire avec interface graphique.
 - `routeur.py` : Nœud de routage intermédiaire.
-- `client.py` : Application utilisateur (Envoi/Réception).
+- `client.py` : Application utilisateur (envoi et réception).
 
 ---
 
 ## Contraintes du Sujet
-- **Bibliothèques Interdites** : `json`, `cryptography` (Respecté : protocole texte et RSA maison).
-- **Bibliothèques Imposées** : `Socket`, `Thread`, `PyQt5`, `MariaDB` (Utilisées).
-- **Algorithme** : Chiffrement asymétrique RSA implémenté de zéro.
+- **Bibliothèques Interdites** : `json`, `cryptography`.
+- **Bibliothèques Imposées** : `Socket`, `Thread`, `PyQt5`, `MariaDB`.
+- **Algorithme** : Chiffrement RSA implémenté.
 
 ---
 
@@ -100,7 +100,5 @@ sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onio
 Groupe : Les pinguoins
 - Quentin HARTMANN
 - Akaza KOUAME
-
-Projet réalisé dans le cadre de la SAE 3.02 - Réseaux & Télécoms (2025).
 
 
