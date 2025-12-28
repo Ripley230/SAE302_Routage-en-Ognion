@@ -53,16 +53,19 @@ graph LR
 ---
 
 ## Commandes utiles
-
+### Pour ajputer une nouvelle @IP 
 ```bash
 sudo ip addr add 10.0.2.10/24 dev eth0
 ```
+### Pour suprimer une @IP que l'on ne souhaite pas avoir
 ```bash
 sudo ip addr del 10.0.2.15/24 dev eth0
 ```
+### Pour démarer le service mariadb en cas de nécessitée (restart pour redémarer et stop pour l'éteindre) 
 ```bash
 sudo service mariadb start
 ```
+### Pour crée et configure l'utilisateur 'onion' avec tous les droits d'accès pour permettre aux scripts Python de se connecter à la base de données mariadb
 ```bash
 sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onion'; ALTER USER 'onion'@'localhost' IDENTIFIED BY 'onion'; GRANT ALL PRIVILEGES ON *.* TO 'onion'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 ```
