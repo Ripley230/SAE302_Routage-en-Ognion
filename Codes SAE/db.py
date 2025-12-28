@@ -1,6 +1,5 @@
 import mysql.connector
 
-# Config BDD
 USER = 'onion'
 PASSWORD = 'onion'
 HOST = 'localhost'
@@ -9,7 +8,6 @@ DATABASE = 'onion_routing_db'
 def get_connexion():
     """Se connecte à la base."""
     try:
-        # On tente d'abord par le socket Unix (plus fiable sur Linux/Kali)
         bdd = mysql.connector.connect(
             user=USER,
             password=PASSWORD,
@@ -20,7 +18,6 @@ def get_connexion():
         return bdd
     except:
         try:
-            # Si échec, on tente par l'IP classique
             bdd = mysql.connector.connect(
                 user=USER,
                 password=PASSWORD,
@@ -35,7 +32,6 @@ def get_connexion():
 def init_bdd():
     """Crée la table si elle manque."""
     try:
-        # Connexion sans base pour la créer
         try:
             bdd = mysql.connector.connect(user=USER, password=PASSWORD, host='localhost', unix_socket='/run/mysqld/mysqld.sock')
         except:
@@ -45,11 +41,9 @@ def init_bdd():
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE}")
         bdd.close()
         
-        # Connexion à la base
         bdd = get_connexion()
         cursor = bdd.cursor()
         
-        # Table simple
         sql = """
         CREATE TABLE IF NOT EXISTS routeurs (
             ip VARCHAR(50),
@@ -73,10 +67,8 @@ def ajouter_routeur(ip, port, e, n):
     if not bdd: return
     
     cursor = bdd.cursor()
-    # On supprime s'il existait déjà pour éviter les doublons (plus simple que UPDATE)
     cursor.execute("DELETE FROM routeurs WHERE ip=%s AND port=%s", (ip, port))
     
-    # On ajoute
     cursor.execute("INSERT INTO routeurs (ip, port, e, n) VALUES (%s, %s, %s, %s)", 
                    (ip, port, str(e), str(n)))
     
@@ -84,13 +76,11 @@ def ajouter_routeur(ip, port, e, n):
     bdd.close()
 
 def lire_routeurs():
-    """Renvoie la liste des routeurs"""
     bdd = get_connexion()
     if not bdd: return []
     
     cursor = bdd.cursor()
     cursor.execute("SELECT ip, port, e, n FROM routeurs")
-    # fetchall renvoie une liste de tuples : [('127.0.0.1', 8000, '65537', '...'), ...]
     resultats = cursor.fetchall()
     bdd.close()
     
