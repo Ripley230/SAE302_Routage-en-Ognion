@@ -75,7 +75,7 @@ sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onio
 ## Guide d'Utilisation
 
 1. **Démarrer l'Annuaire** : `python3 directory_node.py` -> Cliquez sur "Lancer le serveur".
-2. **Démarrer les Routeurs** : Lancez 3 instances de `onion_router.py` -> Cliquez sur "Démarrer".
+2. **Démarrer les Routeurs** : Lancez 3* le script `router.py` -> Cliquez sur "Démarrer".
 3. **Lancer les Clients** : `python3 client.py` (ouvrez-en deux pour tester la communication).
 
 ---
