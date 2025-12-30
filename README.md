@@ -2,6 +2,11 @@ Projet SAE 3.02 : Routage en Oignon (Onion Routing)
 
 > Conception d’une architecture distribuée avec routage en oignon pour l'anonymisation des flux.
 
+## Auteurs
+Groupe : Les pinguoins
+- Quentin HARTMANN
+- Akaza KOUAME
+
 ---
 
 ## Sommaire
@@ -12,7 +17,6 @@ Projet SAE 3.02 : Routage en Oignon (Onion Routing)
 5. [Guide d'Utilisation](#-guide-dutilisation)
 6. [Structure du Projet](#-structure-du-projet)
 7. [Contraintes du Sujet](#-contraintes-du-sujet)
-8. [Auteurs](#-auteurs)
 
 ---
 
@@ -93,12 +97,3 @@ sudo mysql -e "CREATE USER IF NOT EXISTS 'onion'@'localhost' IDENTIFIED BY 'onio
 - **Bibliothèques Interdites** : `json`, `cryptography`.
 - **Bibliothèques Imposées** : `Socket`, `Thread`, `PyQt5`, `MariaDB`.
 - **Algorithme** : Chiffrement RSA implémenté.
-
----
-
-## Auteurs
-Groupe : Les pinguoins
-- Quentin HARTMANN
-- Akaza KOUAME
-
-
